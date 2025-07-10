@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import faqSystemPrompt from '../faqContext';
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 const VoiceAssistant: React.FC = () => {
@@ -73,8 +74,17 @@ const VoiceAssistant: React.FC = () => {
           Authorization: `Bearer ${process.env.REACT_APP_OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'deepseek/deepseek-r1-distill-llama-70b:free',
-          messages: [{ role: 'user', content: text }],
+        model: 'deepseek/deepseek-r1-distill-llama-70b:free',
+        messages: [
+            {
+            role: 'system',
+            content: faqSystemPrompt,
+            },
+            {
+            role: 'user',
+            content: text,
+            },
+        ],
         }),
       });
 
