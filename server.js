@@ -14,11 +14,28 @@ app.use(express.static(path.join(__dirname, 'build')));
 // Initialize GCP Text-to-Speech client
 let ttsClient;
 try {
-  ttsClient = new TextToSpeechClient({
-    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS || './gcp-credentials.json'
-  });
+  // Check if we have environment variable credentials
+  if (process.env.GOOGLE_CREDENTIALS) {
+    // Use credentials from environment variable
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    ttsClient = new TextToSpeechClient({ credentials });
+    console.log('✅ GCP client initialized with environment credentials');
+  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    // Use credentials file path (for local development)
+    ttsClient = new TextToSpeechClient({
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+    });
+    console.log('✅ GCP client initialized with credentials file');
+  } else {
+    // Try local file as fallback
+    ttsClient = new TextToSpeechClient({
+      keyFilename: './gcp-credentials.json'
+    });
+    console.log('✅ GCP client initialized with local file');
+  }
 } catch (error) {
-  console.error('Failed to initialize GCP client:', error.message);
+  console.error('❌ Failed to initialize GCP client:', error.message);
+  console.log('📝 Make sure to set GOOGLE_CREDENTIALS environment variable or have gcp-credentials.json in the project root');
 }
 
 // TTS endpoint
@@ -68,6 +85,16 @@ app.post('/api/tts', async (req, res) => {
       details: error.message 
     });
   }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    gcpClient: !!ttsClient,
+    hasCredentials: !!(process.env.GOOGLE_CREDENTIALS || process.env.GOOGLE_APPLICATION_CREDENTIALS),
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Serve React app for all other routes

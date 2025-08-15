@@ -221,7 +221,7 @@ const VoiceAssistant: React.FC = () => {
     setTtsStatus('idle');
     
     try {
-      const response = await fetch('http://localhost:3001/api/tts', {
+      const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
