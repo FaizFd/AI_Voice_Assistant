@@ -1,5 +1,6 @@
 // src/App.tsx
 import React from 'react';
+import './App.css';
 import VoiceAssistant from './components/VoiceAssistant';
 
 function App() {
