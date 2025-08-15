@@ -218,9 +218,11 @@ const VoiceAssistant: React.FC = () => {
   const speakWithGCP = async (text: string) => {
     const ttsStartTime = performance.now();
     console.log('⏱️ Starting TTS processing...');
+    console.log('📝 Text to synthesize:', text);
     setTtsStatus('idle');
     
     try {
+      console.log('📤 Sending request to /api/tts');
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: {
@@ -233,45 +235,63 @@ const VoiceAssistant: React.FC = () => {
         }),
       });
 
+      console.log('📥 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
       if (!response.ok) {
-        throw new Error(`TTS request failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Response not ok:', errorText);
+        throw new Error(`TTS request failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const ttsEndTime = performance.now();
       console.log(`✅ TTS processing completed in ${(ttsEndTime - ttsStartTime).toFixed(2)}ms`);
       setTtsStatus('gcp');
 
+      console.log('🎵 Creating audio blob...');
       const audioBlob = await response.blob();
+      console.log('📊 Audio blob size:', audioBlob.size, 'bytes');
+      
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       currentAudioRef.current = audio;
       
+      console.log('🔊 Playing audio...');
       audio.onended = () => {
+        console.log('✅ Audio playback completed');
         URL.revokeObjectURL(audioUrl);
         currentAudioRef.current = null;
         setTtsStatus('idle');
       };
       
-      audio.play().catch(() => {
+      audio.play().catch((error) => {
+        console.error('❌ Audio playback failed:', error);
         setTtsStatus('error');
       });
 
     } catch (error) {
       const ttsEndTime = performance.now();
       console.log(`❌ TTS processing failed after ${(ttsEndTime - ttsStartTime).toFixed(2)}ms`);
+      console.error('❌ TTS Error details:', error);
       setTtsStatus('browser');
       
       // Fallback to browser's built-in speech synthesis
       if ('speechSynthesis' in window) {
+        console.log('🔄 Falling back to browser TTS...');
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'en-US') || null;
         
         utterance.onend = () => {
+          console.log('✅ Browser TTS completed');
           setTtsStatus('idle');
         };
         
         speechSynthesis.speak(utterance);
       } else {
+        console.error('❌ No TTS available');
         setTtsStatus('error');
       }
     }

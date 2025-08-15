@@ -31,6 +31,11 @@ try {
 }
 
 module.exports = async (req, res) => {
+  console.log('🎤 TTS function called');
+  console.log('Method:', req.method);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -38,6 +43,7 @@ module.exports = async (req, res) => {
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('🔄 Handling preflight request');
     res.status(200).end();
     return;
   }
@@ -49,6 +55,7 @@ module.exports = async (req, res) => {
     
     try {
       const { text, voice = 'en-US-Standard-A', language = 'en-US' } = req.body;
+      console.log('📝 Request data:', { text, voice, language });
 
       if (!text) {
         console.log('❌ No text provided');
@@ -69,11 +76,14 @@ module.exports = async (req, res) => {
         audioConfig: { audioEncoding: 'MP3' },
       };
 
+      console.log('📤 Sending request to GCP:', request);
+
       // Perform the text-to-speech request
       const [response] = await ttsClient.synthesizeSpeech(request);
       
       const gcpEndTime = Date.now();
       console.log(`✅ GCP TTS completed in ${gcpEndTime - gcpStartTime}ms`);
+      console.log(`📊 Audio size: ${response.audioContent.length} bytes`);
       
       // Set headers for audio response
       res.set({
@@ -81,21 +91,29 @@ module.exports = async (req, res) => {
         'Content-Length': response.audioContent.length,
       });
 
+      console.log('📤 Sending audio response');
       // Send the audio content
       res.send(response.audioContent);
 
     } catch (error) {
       const gcpEndTime = Date.now();
       console.log(`❌ GCP TTS failed after ${gcpEndTime - gcpStartTime}ms`);
-      console.error('TTS Error:', error.message);
+      console.error('TTS Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        stack: error.stack
+      });
       res.status(500).json({ 
         error: 'Text-to-speech failed',
-        details: error.message 
+        details: error.message,
+        code: error.code
       });
     }
     return;
   }
 
   // Handle other requests
+  console.log('❌ Method not allowed:', req.method);
   res.status(405).json({ error: 'Method not allowed' });
 }; 
