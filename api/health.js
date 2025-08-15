@@ -12,18 +12,14 @@ module.exports = async (req, res) => {
 
   // Handle health check
   if (req.method === 'GET') {
-    console.log('🏥 Health check requested');
-    
-    // Check if GCP credentials are available
     const hasCredentials = !!process.env.GOOGLE_CREDENTIALS;
     
     res.json({ 
       status: 'ok', 
-      gcpClient: hasCredentials, // We'll check this in the TTS function
+      gcpClient: hasCredentials,
       hasCredentials: hasCredentials,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'production',
-      message: 'Health check endpoint working'
+      environment: process.env.NODE_ENV || 'production'
     });
     return;
   }

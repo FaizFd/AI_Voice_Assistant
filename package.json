@@ -2,7 +2,6 @@
   "name": "voice-ai-app",
   "version": "0.1.0",
   "private": true,
-  "main": "server.js",
   "dependencies": {
     "@google-cloud/text-to-speech": "^5.0.0",
     "@testing-library/dom": "^10.4.0",
@@ -24,12 +23,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "server": "node server.js"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
