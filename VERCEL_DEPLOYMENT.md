@@ -19,7 +19,7 @@
 2. Navigate to "Settings" > "Environment Variables"
 3. Add the following variable:
    - **Name**: `GOOGLE_CREDENTIALS`
-   - **Value**: Copy the entire content of your downloaded JSON file
+   - **Value**: Copy the entire content of your downloaded JSON file (or base64-encoded version)
    - **Environment**: Production (and Preview if needed)
 
 ### 3. Deploy to Vercel
@@ -56,6 +56,29 @@ vercel --prod
 - Check Vercel function logs
 - Verify all environment variables are set
 - Test the health endpoint
+
+### TTS Failed - Debugging Steps
+1. **Check Vercel Function Logs:**
+   - Go to Vercel Dashboard → Functions → View logs
+   - Look for error messages in the serverless function
+
+2. **Test Health Endpoint:**
+   - Visit: `https://your-app.vercel.app/api/health`
+   - Should show: `{"status":"ok","gcpClient":true,"hasCredentials":true}`
+
+3. **Check GCP Permissions:**
+   - Ensure your service account has "Cloud Text-to-Speech Admin" role
+   - Verify Text-to-Speech API is enabled in your GCP project
+
+4. **Verify Environment Variables:**
+   - In Vercel Dashboard → Settings → Environment Variables
+   - Make sure `GOOGLE_CREDENTIALS` is set for Production environment
+   - Check that the value is not truncated or corrupted
+
+5. **Test with Browser Console:**
+   - Open your app in browser
+   - Open Developer Tools → Console
+   - Look for error messages when TTS fails
 
 ### Local vs Production
 - Local: Uses `gcp-credentials.json` file

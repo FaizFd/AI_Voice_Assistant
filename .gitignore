@@ -28,3 +28,4 @@ gcp-credentials.json
 *.json
 !package.json
 !package-lock.json
+.vercel
