@@ -42,21 +42,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Handle health check
-  if (req.method === 'GET' && req.url === '/api/health') {
-    console.log('🏥 Health check requested');
-    res.json({ 
-      status: 'ok', 
-      gcpClient: !!ttsClient,
-      hasCredentials: !!process.env.GOOGLE_CREDENTIALS,
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'production'
-    });
-    return;
-  }
-
   // Handle TTS requests
-  if (req.method === 'POST' && req.url === '/api/tts') {
+  if (req.method === 'POST') {
     console.log('🎤 TTS request received');
     const gcpStartTime = Date.now();
     
@@ -110,5 +97,5 @@ module.exports = async (req, res) => {
   }
 
   // Handle other requests
-  res.status(404).json({ error: 'Not found' });
+  res.status(405).json({ error: 'Method not allowed' });
 }; 
