@@ -85,11 +85,9 @@ module.exports = async (req, res) => {
       console.log(`✅ GCP TTS completed in ${gcpEndTime - gcpStartTime}ms`);
       console.log(`📊 Audio size: ${response.audioContent.length} bytes`);
       
-      // Set headers for audio response
-      res.set({
-        'Content-Type': 'audio/mp3',
-        'Content-Length': response.audioContent.length,
-      });
+      // Set headers for audio response (Vercel serverless function way)
+      res.setHeader('Content-Type', 'audio/mp3');
+      res.setHeader('Content-Length', response.audioContent.length);
 
       console.log('📤 Sending audio response');
       // Send the audio content
